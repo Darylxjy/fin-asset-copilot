@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>金融资产接入与账务适配 Copilot · 产品介绍</title>
+<style>
+  :root{
+    --bg:#0e1117; --surface:#171b24; --surface2:#1f2530; --line:#2a313d;
+    --ink:#e7ebf0; --sub:#a7b0bd; --idle:#6b7480;
+    --ai:#4b8bff; --ai-soft:rgba(75,139,255,.12);
+    --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:15px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 24px 80px}
+  a{color:var(--ai);text-decoration:none}
+  .pill{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;
+    background:var(--ai-soft);color:var(--ai);border:1px solid rgba(75,139,255,.25)}
+  .pill.ok{background:rgba(52,211,153,.12);color:var(--ok);border-color:rgba(52,211,153,.25)}
+  .pill.warn{background:rgba(251,191,36,.12);color:var(--warn);border-color:rgba(251,191,36,.25)}
+  .pill.danger{background:rgba(248,113,113,.12);color:var(--danger);border-color:rgba(248,113,113,.25)}
+
+  /* Hero */
+  .hero{
+    background:linear-gradient(160deg,rgba(75,139,255,.16),rgba(75,139,255,.02));
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:40px 36px; margin-bottom:32px;
+  }
+  .hero .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ai);font-weight:700}
+  .hero h1{font-size:32px;line-height:1.25;margin:10px 0 6px;font-weight:800}
+  .hero .en{color:var(--idle);font-size:14px;font-weight:600;letter-spacing:.04em}
+  .hero p.lead{margin:18px 0 0;color:var(--sub);font-size:16px;max-width:760px}
+  .hero .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+
+  /* Section */
+  section{margin-top:44px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+  .sec-head .no{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ai);font-weight:700;font-size:14px}
+  .sec-head h2{font-size:21px;margin:0;font-weight:700}
+  .sec-head .h2en{color:var(--idle);font-size:13px;font-weight:600}
+  p{color:var(--sub)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px}
+  .card + .card{margin-top:16px}
+
+  /* metric grid */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+  .metric{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .metric .num{font-size:28px;font-weight:800}
+  .metric .lbl{color:var(--sub);font-size:12.5px;margin-top:4px}
+  .metric.ai .num{color:var(--ai)} .metric.warn .num{color:var(--warn)} .metric.danger .num{color:var(--danger)}
+
+  /* two-col */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .mini{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .mini h4{margin:0 0 8px;font-size:14.5px;color:var(--ink)}
+  .mini ul{margin:0;padding-left:18px;color:var(--sub);font-size:13.5px}
+  .mini ul li{margin:4px 0}
+
+  /* dims */
+  .dims{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .dim{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--surface)}
+  .dim .dt{font-weight:700;color:var(--ink);font-size:15px;display:flex;gap:8px;align-items:center}
+  .dim .dt .badge{width:22px;height:22px;border-radius:6px;background:var(--ai-soft);color:var(--ai);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .dim .dd{color:var(--sub);font-size:13.5px;margin-top:8px}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--idle);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  td .t{color:var(--ink);font-weight:600}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .tag-ok{color:var(--ok)} .tag-warn{color:var(--warn)} .tag-idle{color:var(--idle)}
+
+  /* flow */
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+  .flow .step{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--ink)}
+  .flow .arrow{color:var(--idle)}
+
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--idle);font-size:12.5px}
+  .note{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:18px 20px;margin-top:18px}
+  .note h4{margin:0 0 8px;color:var(--warn);font-size:14px}
+  .note ul{margin:0;padding-left:18px;color:var(--sub);font-size:13px}
+  .note ul li{margin:4px 0}
+
+  .summary-line{color:var(--ink);font-weight:600}
+  @media(max-width:780px){.metrics{grid-template-columns:repeat(2,1fr)}.grid2,.dims{grid-template-columns:1fr}.hero{padding:28px 20px}.hero h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="kicker">AI Product Manager Portfolio</div>
+    <h1>金融资产接入与账务适配 Copilot</h1>
+    <div class="en">Financial Asset Onboarding &amp; Ledger Adaptation Copilot</div>
+    <p class="lead">
+      面向<strong style="color:var(--ink)">消费金融 / 信贷资产接入</strong>场景的 AI 产品原型。当资产方（如消费金融机构）接入我方账务系统时，
+      自动完成<strong style="color:var(--ink)">字段差异识别、映射建议、案例四维度校验、待确认问题收敛</strong>，并输出可评审的结构化报告。
+      定位是 <strong style="color:var(--ink)">Copilot 而非替代者</strong>：把人从机械的阅读与比对中解放出来，把时间留给真正的业务判断与方案设计。
+    </p>
+    <div class="tags">
+      <span class="pill">规则引擎 + 模拟 AI</span>
+      <span class="pill">Human-in-the-loop</span>
+      <span class="pill">RAG 适配架构</span>
+      <span class="pill">四维度校验</span>
+      <span class="pill">可评审报告</span>
+    </div>
+  </div>
+
+  <!-- 0. 概览指标 -->
+  <section>
+    <div class="metrics">
+      <div class="metric ai"><div class="num">11</div><div class="lbl">功能页面</div></div>
+      <div class="metric"><div class="num">12</div><div class="lbl">账务 sheet 模板</div></div>
+      <div class="metric"><div class="num">6</div><div class="lbl">交付演示案例</div></div>
+      <div class="metric warn"><div class="num">21</div><div class="lbl">历史业务注意点</div></div>
+      <div class="metric ok"><div class="num">9/9</div><div class="lbl">Golden Case 通过</div></div>
+      <div class="metric"><div class="num">9</div><div class="lbl">评测指标</div></div>
+      <div class="metric"><div class="num">4</div><div class="lbl">核心校验维度</div></div>
+      <div class="metric danger"><div class="num">0</div><div class="lbl">真实大模型调用</div></div>
+    </div>
+  </section>
+
+  <!-- 1. 产品定位 -->
+  <section>
+    <div class="sec-head"><span class="no">01</span><h2>产品定位与价值</h2><span class="h2en">Positioning</span></div>
+    <div class="card">
+      <p>
+        资产接入是消费金融机构与资金方合作的关键环节，核心交付物是一份份结构复杂、版本多变的<strong style="color:var(--ink)">账务文件</strong>
+        （含客户、借据、还款计划、流水、资金对账等多类 sheet）与对接方的<strong style="color:var(--ink)">接口文档</strong>。
+        产品经理需要在接入之初，快速判断「字段对不对得上、版本变没变、业务场景自不自洽、会不会影响其他产品线」，并收敛出需要人工确认的问题。
+      </p>
+      <p>
+        本产品把上述工作拆成<strong style="color:var(--ink)">确定性规则</strong>能跑的、<strong style="color:var(--ink)">语义理解</strong>要做的、
+        <strong style="color:var(--ink)">人必须拍板</strong>的三类，分别交给规则引擎、LLM（模拟）、产品经理，
+        最终沉淀为一份可评审、可导出、可追溯的分析报告。
+      </p>
+      <div class="grid2" style="margin-top:16px">
+        <div class="mini"><h4>为谁解决</h4><ul>
+          <li>金融产品经理（资产接入 / 账务适配方向）</li>
+          <li>需要对接口文档与账务文件做差异比对的需求/分析角色</li>
+          <li>负责跨产品线接入一致性校验的架构/风控角色</li>
+        </ul></div>
+        <div class="mini"><h4>带来什么</h4><ul>
+          <li>把「逐字段人工比对」变成「规则自动跑、人只看结论」</li>
+          <li>把散落的历史注意点沉淀为可程序化验证的知识</li>
+          <li>把待确认问题收敛成人机协同闭环，结论可追溯</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 场景发现 -->
+  <section>
+    <div class="sec-head"><span class="no">02</span><h2>发现的真实业务问题</h2><span class="h2en">Problem</span></div>
+    <div class="grid2">
+      <div class="mini"><h4>接口资料阅读成本高</h4><ul>
+        <li>接口文档长、字段多，人工提取接口 / 字段 / 枚举 / 错误码耗时且易漏</li>
+      </ul></div>
+      <div class="mini"><h4>内外适配判断复杂</h4><ul>
+        <li>同名异义、异名同义、类型 / 精度 / 枚举不一致需逐项核对</li>
+      </ul></div>
+      <div class="mini"><h4>账务文件版本变化比对困难</h4><ul>
+        <li>新旧版本字段新增 / 删除 / 改名 / 改义，仅按字段名比较会漏掉「改名不改义、改义不改名」</li>
+      </ul></div>
+      <div class="mini"><h4>账务 Demo 问题依赖人工发现</h4><ul>
+        <li>Demo 字段是否与文档一致、枚举是否越界、精度是否符合，需人工逐条校验</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 3. 产品取舍 -->
+  <section>
+    <div class="sec-head"><span class="no">03</span><h2>为什么 MVP 只先做账务文件适配</h2><span class="h2en">Scope</span></div>
+    <div class="card">
+      <p>
+        完整的资产接入平台包含接口文档解析、接口适配、账务适配、贷后适配、自动化配置等庞大范围。第一版不追求大而全，
+        而是先攻坚<strong style="color:var(--ink)">最机械、最易遗漏、ROI 最高</strong>的环节——账务文件及字段适配分析：
+      </p>
+      <ul style="color:var(--sub)">
+        <li>账务字段数量大、版本变化频繁，人工比对成本最高；</li>
+        <li>字段差异规则清晰，适合先用确定性规则引擎跑通链路；</li>
+        <li>待确认问题天然需要人工介入，能自然体现 Human-in-the-loop；</li>
+        <li>先验证「规则 + 语义 + RAG」的分工模式，再扩展到接口适配。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. 核心能力：四维度 -->
+  <section>
+    <div class="sec-head"><span class="no">04</span><h2>核心能力：案例四维度校验</h2><span class="h2en">Core Capability</span></div>
+    <p>本 Demo 还原了一条真实的资产接入交付链路：从多 sheet 源文件拆分为独立案例文件，再以账务文件文档为模板填充表头、按贷款单号从 DAT 填充数据，最后做<strong style="color:var(--ink)">全量校验</strong>。校验环节对应四个维度：</p>
+    <div class="dims" style="margin-top:16px">
+      <div class="dim">
+        <div class="dt"><span class="badge">1</span>结构一致性校验</div>
+        <div class="dd">以账务文件文档为基准，逐案例核对 12 个 sheet 是否齐全、表头字段是否与模板一致（集合差集检测，避免中间插列被误判为末尾追加）。</div>
+      </div>
+      <div class="dim">
+        <div class="dt"><span class="badge">2</span>新老版本差异对比</div>
+        <div class="dd">按文件名匹配，逐 sheet、逐字段、逐行对比：新增 / 删除 sheet、字段值变化、金额差异方向与大小；精度按金额类列对齐比较（2→4 位）。</div>
+      </div>
+      <div class="dim">
+        <div class="dt"><span class="badge">3</span>业务场景自主分析</div>
+        <div class="dd">读取场景 sheet 时间线，自主判断「该有的数据有没有、不该有的有没有、时间点与逻辑是否自洽」：放款 / 还款 / 结清自洽、退款无流水、余额 = 放款 − 已还本金、逾期罚息合理性。</div>
+      </div>
+      <div class="dim">
+        <div class="dt"><span class="badge">4</span>跨产品线类比 + 历史注意点</div>
+        <div class="dd">扫描其他产品案例，判断新场景是否影响现有产品线解析逻辑（如示例分期产品专用字段）；用沉淀的 21 条业务注意点逐条验证，输出通过 / 不通过 / 不适用。</div>
+      </div>
+    </div>
+    <div class="note">
+      <h4>⚠ 数据与免责声明</h4>
+      <ul>
+        <li>本 Demo 全部数据为<strong style="color:var(--ink)">虚构脱敏</strong>（主体「示例资产方 A / 示例账务系统 / 示例分期产品」为虚构），<strong style="color:var(--ink)">禁止对应任何真实企业、产品或文件</strong>。</li>
+        <li>AI 分析为<strong style="color:var(--ink)">模拟</strong>（规则引擎 + 确定性叙事），页面全程标注「模拟 AI 分析（非真实大模型）」，未调用任何真实大模型 API。</li>
+        <li>分析引擎使用内置虚构案例以保证<strong style="color:var(--ink)">演示确定性</strong>；「资料管理」上传的真实文件仅作只读预览，不反向驱动内置分析。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. 架构与技术方案 -->
+  <section>
+    <div class="sec-head"><span class="no">05</span><h2>产品架构与技术方案</h2><span class="h2en">Architecture</span></div>
+    <div class="card">
+      <div class="flow">
+        <span class="step">文件上传</span><span class="arrow">→</span>
+        <span class="step">文件解析</span><span class="arrow">→</span>
+        <span class="step">字段结构化</span><span class="arrow">→</span>
+        <span class="step">规则引擎（确定性比较）</span><span class="arrow">→</span>
+        <span class="step">检索内部知识（RAG）</span><span class="arrow">→</span>
+        <span class="step">LLM 语义与业务分析</span><span class="arrow">→</span>
+        <span class="step">结构化 JSON 输出</span><span class="arrow">→</span>
+        <span class="step">人工确认</span><span class="arrow">→</span>
+        <span class="step">分析报告</span>
+      </div>
+      <p style="margin-top:18px">
+        <strong style="color:var(--ink)">AI 与规则分工（核心设计原则）：</strong>
+        规则负责确定性判断（字段新增 / 删除、类型 / 长度 / 精度变化、必填规则变化、枚举增减、日期 / 金额格式、CSV 字段计数）；
+        LLM 负责语义与业务（异名同义识别、业务含义变化、逻辑冲突判断、候选映射推测、系统影响分析、待确认问题生成）；
+        RAG 提供内部上下文（我方字段定义、系统业务规则、历史需求、历史接入案例、已确认问题、历史映射关系）。
+      </p>
+      <p>
+        <strong style="color:var(--ink)">为什么 RAG 而非微调：</strong>内部接口 / 字段 / 规则变化频繁，通用大模型 + RAG + 规则引擎更跟得上迭代；
+        不同资产方文档差异大，需要可插拔上下文；且 RAG 天然可追溯，便于展示判断依据与知识来源，利于企业知识的隔离与治理。
+      </p>
+      <p style="margin:0">
+        Demo 第一阶段使用「规则引擎 + Mock AI 分析结果」：未配置模型 API 时明确标注「当前为模拟 AI 分析结果」，不假装调用大模型；
+        同时预留 <code style="color:var(--ai)">analyzeWithAI(context)</code> 接口，后续可接入通义千问 / OpenAI / Claude 等，API Key 不硬编码在前端。
+      </p>
+    </div>
+  </section>
+
+  <!-- 6. 信息架构与页面清单 -->
+  <section>
+    <div class="sec-head"><span class="no">06</span><h2>信息架构与页面清单</h2><span class="h2en">Information Architecture</span></div>
+    <div class="card">
+      <table>
+        <thead><tr><th>页面</th><th>英文</th><th>看什么 / 验证什么</th></tr></thead>
+        <tbody>
+          <tr><td><span class="t">项目首页</span></td><td>Dashboard</td><td>全局概览：已上传资料 / 字段总数 / 高风险项 / 待确认问题 / 交付案例 / 结构一致性</td></tr>
+          <tr><td><span class="t">资料管理</span></td><td>Documents</td><td>三类资料上传（账务文件文档 / demo 多文件 / 参考示例）；本地真实文件只读预览（.xlsx/.dat/.txt/.csv，@!@ 或逗号 / 制表符自动分列）</td></tr>
+          <tr><td><span class="t">字段模板</span></td><td>Field Template</td><td>我方（示例账务系统）字段字典 + 资产方账务字段说明（V1 / V2）；V1→V2 字段增删与精度变化是差异分析基准</td></tr>
+          <tr><td><span class="t">案例文件</span></td><td>Case Files</td><td>6 个交付案例（场景 sheet + 各账务 sheet），按真实工作流拆出并填充</td></tr>
+          <tr><td><span class="t">交付比对</span></td><td>Delivery Diff</td><td>文档字段适配（V1 / V2）逐字段比对结果</td></tr>
+          <tr><td><span class="t">差异与适配分析</span></td><td>Analysis</td><td>① 文档字段适配 ② 案例四维度校验（结构 / 差异 / 场景 / 跨产品 + 历史注意点）</td></tr>
+          <tr><td><span class="t">待确认问题</span></td><td>Questions</td><td>规则引擎 + 模拟 AI 产出待人工确认项，支持接受 / 修改 / 驳回 / 待确认</td></tr>
+          <tr><td><span class="t">分析报告</span></td><td>Report</td><td>可导出 HTML / JSON 的结构化报告，含案例四维度校验结论，与待确认问题相互印证</td></tr>
+          <tr><td><span class="t">评测中心</span></td><td>Evaluation</td><td>9 类 Golden Case 真实执行结果 + 9 项评测指标（当前 9/9 通过）</td></tr>
+          <tr><td><span class="t">产品方案说明</span></td><td>Portfolio</td><td>产品定位 / 取舍 / AI 与规则分工 / RAG vs 微调 / 技术方案 / 真实工作流还原（"为什么这么做"的完整论述）</td></tr>
+          <tr><td><span class="t">使用指引</span></td><td>Guide</td><td>面向分享对象的 2 分钟导览：点哪里、看什么、验证什么</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. 字段模板（12 sheet） -->
+  <section>
+    <div class="sec-head"><span class="no">07</span><h2>数据底座：12 个账务 sheet 模板</h2><span class="h2en">Field Templates</span></div>
+    <div class="card">
+      <p>以「账务文件明细_」系列 sheet 为模板定义，覆盖资产接入所需的全量账务对象（文件传输说明 → 文件名称 fileCode → 科目说明 → 字段中文名 + 类型 / 长度 / 枚举）：</p>
+      <table>
+        <thead><tr><th>fileCode</th><th>中文名</th><th>关键字段（示例）</th></tr></thead>
+        <tbody>
+          <tr><td><span class="t">CUS</span></td><td>客户信息</td><td>业务日期 / 合同号 / 客户编号 / 客户姓名 / 证件类型 / 证件号码 / 手机号 / 客户类型</td></tr>
+          <tr><td><span class="t">CUSCREDIT</span></td><td>客户授信</td><td>授信额度 / 授信期限 / 授信状态 / 授信利率 / 额度生效日</td></tr>
+          <tr><td><span class="t">QUOTAADJUST</span></td><td>额度调整</td><td>调整前额度 / 调整后额度 / 调整类型 / 调整原因</td></tr>
+          <tr><td><span class="t">FEEADJUST</span></td><td>费用调整</td><td>费用项（手续费 / 服务费 / 罚息）/ 调整前金额 / 调整后金额</td></tr>
+          <tr><td><span class="t">CUSCHANGE</span></td><td>客户信息变更</td><td>变更项（手机号 / 地址）/ 变更前 / 变更后</td></tr>
+          <tr><td><span class="t">LOAN</span></td><td>贷款借据信息</td><td>贷款单号 / 贷款状态 / 放款金额 / 贷款余额 / <strong style="color:var(--ink)">放款入账日期（新增字段）</strong> / 币种 / 贷款利率</td></tr>
+          <tr><td><span class="t">PLAN</span></td><td>还款计划</td><td>期次 / 应还日期 / 应还本金 / 应还利息 / 应还罚息 / 还款计划状态</td></tr>
+          <tr><td><span class="t">FLOW</span></td><td>还款流水</td><td>还款类型 / 还款本金 / 还款利息 / 还款罚息 / 实还总额 / 还款渠道</td></tr>
+          <tr><td><span class="t">COMFLOW</span></td><td>代偿流水</td><td>代偿类型（担保 / 保险）/ 代偿金额 / 代偿机构</td></tr>
+          <tr><td><span class="t">REPAYMENTFLOW</span></td><td>实还流水</td><td>流水号 / 实还本金 / 实还利息 / 实还罚息</td></tr>
+          <tr><td><span class="t">CASHFLOW</span></td><td>资金流水</td><td>资金划拨码 / 划拨方向 / 划拨金额 / <strong style="color:var(--ink)">示例分期产品资金划拨对账码（产品专用）</strong></td></tr>
+          <tr><td><span class="t">QUOTAFEE</span></td><td>额度费用</td><td>费用类型（取现 / 分期手续费）/ 费用金额 / 计费方式</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8. 演示案例 -->
+  <section>
+    <div class="sec-head"><span class="no">08</span><h2>演示案例：6 类典型业务场景</h2><span class="h2en">Demo Cases</span></div>
+    <div class="card">
+      <p>6 个交付案例覆盖从常规结清到异常边界的全谱系，每个案例均含「场景 sheet（业务时间线）+ 各账务 sheet」，数据自洽以支撑「业务场景自主分析」维度：</p>
+      <table>
+        <thead><tr><th>案例</th><th>客户</th><th>业务场景</th><th>校验看点</th></tr></thead>
+        <tbody>
+          <tr><td><span class="t">案例 1</span></td><td>客户甲</td><td>正常放款 → 3 期还款 → 结清</td><td class="tag-ok">基准案例，结构 / 场景自洽</td></tr>
+          <tr><td><span class="t">案例 2</span></td><td>客户乙</td><td>第 1 期后提前结清剩余本金</td><td>提前结清流水与计划一致性</td></tr>
+          <tr><td><span class="t">案例 3</span></td><td>客户丙</td><td>重组改分期 + 逾期还款（含本利罚）</td><td class="tag-warn">罚息单列、逾期逻辑（触发历史注意点）</td></tr>
+          <tr><td><span class="t">案例 4</span></td><td>客户丁</td><td>未出资退款（放款未成功）</td><td class="tag-warn">贷款状态 0、无还款流水（不该有的不能有）</td></tr>
+          <tr><td><span class="t">案例 5</span></td><td>客户戊</td><td>还款中（非终态，余额 &gt; 0）</td><td class="tag-ok">余额 = 放款 − 已还本金，第 3 期尚未发生</td></tr>
+          <tr><td><span class="t">案例 6</span></td><td>客户己</td><td>重组改分期（无逾期无罚息）</td><td>区别于案例 3：剩余本金改分 3 期自洽</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 9. 评测体系 -->
+  <section>
+    <div class="sec-head"><span class="no">09</span><h2>评测体系：怎么判断 AI 效果变好</h2><span class="h2en">Evaluation</span></div>
+    <div class="card">
+      <p>内置 Golden Test Cases 与 9 项指标，所有指标均根据<strong style="color:var(--ink)">真实测试记录</strong>计算，无记录时显示「暂无评测结果」，不虚构数字。差异检测阶段优先保证召回：</p>
+      <div class="flow" style="margin-top:12px">
+        <span class="pill ok">字段抽取准确率</span>
+        <span class="pill ok">字段差异召回率</span>
+        <span class="pill ok">字段差异准确率</span>
+        <span class="pill ok">字段映射准确率</span>
+        <span class="pill ok">待确认问题有效率</span>
+        <span class="pill ok">AI 建议采纳率</span>
+        <span class="pill ok">AI 建议人工修改率</span>
+        <span class="pill ok">无依据结论率</span>
+        <span class="pill ok">平均分析耗时</span>
+      </div>
+      <p style="margin-top:14px" class="tag-ok">当前状态：CASE_VALIDATION 9 类 Golden Case 全部通过（9/9），指标由真实记录计算。</p>
+    </div>
+  </section>
+
+  <!-- 10. Human-in-the-loop -->
+  <section>
+    <div class="sec-head"><span class="no">10</span><h2>Human-in-the-loop：AI 出错怎么办</h2><span class="h2en">Trust &amp; Control</span></div>
+    <div class="card">
+      <p>所有 AI 生成的关键判断都支持：<span class="pill">接受</span> <span class="pill">修改</span> <span class="pill">驳回</span> <span class="pill">标记待确认</span></p>
+      <p style="margin:0">
+        人工反馈沉淀为「接受 / 修改 / 驳回 / 待确认」记录，可用于后续 Prompt 调优、规则完善、知识库更新与评测集扩充。
+        设计上始终体现：AI 是 Copilot，不是最终决策者；置信度过低或资料不足时允许输出<strong style="color:var(--ink)">「当前资料不足，无法判断」</strong>。
+      </p>
+    </div>
+  </section>
+
+  <!-- 11. 技术栈 -->
+  <section>
+    <div class="sec-head"><span class="no">11</span><h2>技术栈与实现</h2><span class="h2en">Tech Stack</span></div>
+    <div class="card">
+      <div class="flow">
+        <span class="step">React 18</span>
+        <span class="step">TypeScript 5</span>
+        <span class="step">Vite 5</span>
+        <span class="step">Tailwind CSS 3</span>
+        <span class="step">Zustand（持久化）</span>
+        <span class="step">React Router 6</span>
+        <span class="step">xlsx</span>
+        <span class="step">mammoth</span>
+      </div>
+      <p style="margin-top:14px;color:var(--sub)">
+        前端单页应用，确定性四维度分析引擎（结构 / 新老版本差异 / 业务场景自洽 / 跨产品类比 + 21 规则）在本地实时计算；
+        评测用 esbuild 打包真实数据 + 引擎跑 Node 断言，保证「非仅靠编译」；演示数据全虚构脱敏，AI 分析为规则引擎 + 确定性叙事的模拟实现。
+      </p>
+    </div>
+  </section>
+
+  <!-- 12. 亮点 & 演示路径 -->
+  <section>
+    <div class="sec-head"><span class="no">12</span><h2>亮点与演示路径</h2><span class="h2en">Highlights</span></div>
+    <div class="grid2">
+      <div class="mini"><h4>作品集亮点</h4><ul>
+        <li>用规则 / LLM / 人三层分工，正面回答「哪些该用规则、哪些该用 AI」</li>
+        <li>用 RAG vs 微调的决策，体现架构权衡意识</li>
+        <li>四维度校验 + 21 条历史注意点，把隐性经验显性化、可程序化</li>
+        <li>Golden Case + 9 指标，证明效果可度量而非空谈</li>
+        <li>Human-in-the-loop 闭环，体现对 AI 可控性的理解</li>
+      </ul></div>
+      <div class="mini"><h4>推荐演示路径（30 秒上手）</h4><ul>
+        <li>① 案例文件 → 理解交付案例长什么样</li>
+        <li>② 差异与适配分析 → 看四维度校验结论</li>
+        <li>③ 待确认问题 → 体验人机协同</li>
+        <li>④ 分析报告 / 评测中心 → 看导出与通过率</li>
+        <li>⑤ 产品方案说明 → 深入「为什么这么做」</li>
+      </ul></div>
+    </div>
+    <div class="note">
+      <h4>如何运行 / 查看</h4>
+      <ul>
+        <li>本地：进入 <code style="color:var(--ink)">fin-asset-copilot</code> 目录，<code style="color:var(--ink)">npm install &amp;&amp; npm run dev</code>，打开 Vite 提示的本地地址（默认 5173）。</li>
+        <li>线上：Demo 已通过云端发布生成可分享链接（部署时由平台分配 <code style="color:var(--ink)">*.app.workbuddy.link</code> 域名），可对外投递；如链接失效，以上述本地方式重新启动即可。</li>
+        <li>评测：<code style="color:var(--ink)">npm run build</code> 后查看「评测中心」页面，或运行内置 Node 断言脚本验证 9/9 通过。</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">
+    <p class="summary-line">金融资产接入与账务适配 Copilot · AI 产品经理作品集</p>
+    <p>本介绍文档基于 Demo 源码（fin-asset-copilot）生成，与产品实际结构、案例、字段模板、评测结果一致。全部数据为虚构脱敏演示数据，AI 分析为模拟实现，不代表任何真实企业、产品或大模型服务。</p>
+  </div>
+
+</div>
+</body>
+</html>
